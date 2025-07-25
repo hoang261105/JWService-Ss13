@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class UserDetailServiceImp implements UserDetailService {
@@ -31,7 +32,10 @@ public class UserDetailServiceImp implements UserDetailService {
     @Override
     public JWTResponse login(UserLogin userLogin) {
         if ("admin".equals(userLogin.getUsername()) && "1234".equals(userLogin.getPassword())) {
-            String token = jwtProvider.generateToken(userLogin.getUsername());
+
+            List<String> roles = List.of("ROLE_ADMIN");
+
+            String token = jwtProvider.generateToken(userLogin.getUsername(), roles);
 
             return JWTResponse.builder()
                     .username("admin")
@@ -39,10 +43,11 @@ public class UserDetailServiceImp implements UserDetailService {
                     .email("admin@example.com")
                     .phone("0123456789")
                     .enabled(true)
-                    .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")))
+                    .authorities(roles.stream().map(SimpleGrantedAuthority::new).toList())
                     .token(token)
                     .build();
         }
+
         throw new RuntimeException("Invalid username or password");
     }
 }

@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+
+import static java.security.KeyRep.Type.SECRET;
 
 @Component
 @Slf4j
@@ -19,10 +22,11 @@ public class JWTProvider {
     @Value("${jwt_refresh}")
     private int jwtRefresh;
 
-    public String generateToken(String userName){
+    public String generateToken(String userName, List<String> roles){
         Date now = new Date();
         return Jwts.builder()
                 .setSubject(userName)
+                .claim("roles", roles)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + jwtExpire))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
@@ -60,5 +64,14 @@ public class JWTProvider {
                     .compact();
         }
         return null;
+    }
+
+    public List<String> extractRoles(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(String.valueOf(SECRET))
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.get("roles", List.class);
     }
 }
