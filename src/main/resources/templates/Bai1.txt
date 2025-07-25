@@ -1,0 +1,17 @@
+JWT (JSON Web Token) là một chuỗi mã hóa an toàn, được sử dụng để truyền thông tin giữa các hệ thống (thường là giữa client và server) dưới dạng JSON object.
+JWT thường được sử dụng để:
++ Xác thực người dùng (authentication)
++ Ủy quyền truy cập (authorization)
+Chuỗi JWT được ký (signed) để đảm bảo tính toàn vẹn và không bị chỉnh sửa khi truyền qua mạng.
+
+Ưu điểm và nhược điểm của JWT
+Ưu điểm:
++ Stateless: Không cần lưu session trên server.
++ Dễ sử dụng với RESTful API.
++ Tốc độ nhanh: Vì không phải truy cập database thường xuyên để kiểm tra session.
++ Độc lập: Có thể sử dụng giữa nhiều hệ thống khác nhau (multi-platform).
+Nhược điểm:
++ Không thể thu hồi: Một khi token đã cấp, khó thu hồi hoặc vô hiệu hóa sớm.
++ Dễ bị lộ nếu không bảo mật đúng cách.
++ Kích thước lớn hơn session ID (do chứa thông tin trong payload).
+

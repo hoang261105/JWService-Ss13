@@ -1,0 +1,37 @@
+Quy trình xác thực bằng JWT gồm 3 giai đoạn chính:
+1. Đăng nhập (Authentication)
+2. Gửi token từ client
+3. Xác minh token ở backend và xử lý request
+
+Bước 1: Client gửi thông tin đăng nhập
+Client (frontend) gửi yêu cầu POST /login chứa thông tin đăng nhập (username + password).
+Bước 2: Server xác thực thông tin và sinh JWT
+Backend (Spring Boot):
+- Xác thực username + password đúng không (thường dùng AuthenticationManager).
+- Nếu đúng, server tạo JWT chứa các thông tin (claims) như username, roles, exp,...
+- Mã hóa JWT bằng secret key và trả về cho client.
+
+Bước 3: Client lưu trữ JWT
+Client lưu JWT ở:
++ localStorage (phổ biến nhưng dễ bị XSS nếu không cẩn thận)
++ hoặc httpOnly Cookie (bảo mật hơn khỏi XSS)
+
+Bước 4: Client gửi JWT trong các request sau
+Mỗi request sau đó đều gửi kèm JWT qua header:
+
+Bước 5: Server kiểm tra JWT
+Backend thực hiện:
+- Trích xuất JWT từ Authorization header.
+- Xác minh chữ ký JWT với secret key có hợp lệ không.
+- Kiểm tra exp (hết hạn chưa), iat, subject, roles, v.v.
+Nếu hợp lệ:
+- Cho phép truy cập tài nguyên.
+- Spring tạo một Authentication và gán vào SecurityContext.
+Nếu không hợp lệ:
+Trả về lỗi 401 Unauthorized.
+
+Bước 6: Truy cập tài nguyên
+Dựa vào quyền trong token (roles), Spring Security quyết định cho phép hay chặn:
+- /admin/** → cần ROLE_ADMIN
+- /user/** → cần ROLE_USER
+- /public/** → không cần token

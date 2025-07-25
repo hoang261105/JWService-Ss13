@@ -1,0 +1,33 @@
+1. Thiết kế payload của JWT chứa role
+Ví dụ cấu trúc payload JWT:
+{
+  "sub": "admin",
+  "roles": ["ROLE_ADMIN"],
+  "iat": 1721800000,
+  "exp": 1721803600
+}
+sub: username hoặc userId
+roles: danh sách quyền (dùng ROLE_ để Spring Security nhận diện)
+iat, exp: thời gian phát hành và hết hạn
+
+2. Luồng xác thực và phân quyền
+Luồng xử lý:
+Đăng nhập (/login)
+→ Validate thông tin user
+→ Sinh JWT chứa roles
+→ Trả JWT về client
+
+Client gửi yêu cầu kèm header:
+Authorization: Bearer <token>
+JWT Filter (middleware):
+Tách token, kiểm tra hợp lệ
+Đọc roles từ token, gán vào SecurityContext
+
+Spring Security kiểm tra quyền dựa trên annotation như:
+@PreAuthorize("hasRole('ADMIN')")
+
+3. Ví dụ endpoint và phân quyền
+Endpoint	             Ai được phép?	            Annotation Spring Security
+GET /admin/dashboard	 Admin	                    @PreAuthorize("hasRole('ADMIN')")
+POST /editor/post	     Admin, Editor	            @PreAuthorize("hasAnyRole('EDITOR', 'ADMIN')")
+GET /user/profile	     Tất cả (đã login)	        @PreAuthorize("isAuthenticated()")

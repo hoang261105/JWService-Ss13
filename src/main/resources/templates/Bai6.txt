@@ -1,0 +1,100 @@
+1. JWT hết hạn (Expired Token)
+Mô tả:
+Mỗi JWT có exp (expiration time).
+Khi token hết hạn, mọi yêu cầu kèm JWT này sẽ bị từ chối.
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "JWT token has expired",
+  "status": 401
+}
+
+Hành động phía client:
+Hiển thị thông báo “Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại”.
+Logout người dùng.
+Chuyển hướng tới trang đăng nhập.
+
+2. JWT bị chỉnh sửa (Tampered Token)
+Mô tả:
+Token bị thay đổi ở phần payload hoặc signature → không khớp với chữ ký của server.
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "Invalid JWT signature",
+  "status": 401
+}
+
+Hành động phía client:
+Thông báo: “Token không hợp lệ”.
+Xóa token khỏi localStorage/cookie.
+Logout và chuyển hướng đăng nhập.
+
+3. JWT không hợp lệ (Malformed Token)
+Mô tả:
+Token không đúng định dạng (ví dụ thiếu phần payload, không có 3 phần được phân cách bởi .)
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "Malformed JWT token",
+  "status": 400
+}
+
+Hành động phía client:
+Thông báo lỗi kỹ thuật.
+Tự động xóa token lỗi.
+Chuyển hướng đăng nhập lại.
+
+4. JWT bị thiếu (Missing Token)
+Mô tả:
+Client không gửi token trong header Authorization.
+
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "Missing Authorization header",
+  "status": 401
+}
+
+Hành động phía client:
+Chuyển hướng login.
+
+Thông báo “Vui lòng đăng nhập để tiếp tục”.
+
+5. JWT dùng sai dạng Authorization header
+Mô tả:
+Dạng đúng phải là: Authorization: Bearer <token>
+Nếu thiếu "Bearer" hoặc sai cú pháp → server từ chối.
+
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "Invalid Authorization header format",
+  "status": 401
+}
+
+Hành động phía client:
+Sửa lỗi lập trình (nếu là dev).
+
+Không hiển thị lỗi cho user cuối nếu có thể tự sửa.
+
+6. JWT dùng với tài khoản bị khóa / bị xóa
+Mô tả:
+Dù token hợp lệ, nếu user tương ứng bị khóa hoặc xóa trên server → server từ chối.
+
+Ví dụ response từ server:
+
+{
+  "success": false,
+  "message": "User account is disabled or deleted",
+  "status": 403
+}
+
+Hành động phía client:
+Thông báo: “Tài khoản đã bị khóa hoặc không còn tồn tại”.
+
+Logout và chuyển hướng về trang chính.

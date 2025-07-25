@@ -1,0 +1,70 @@
+1. Giải mã chuỗi JWT mẫu
+JWT mẫu (giả định bạn nhận được từ server):
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.
+SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+✅ 2. Phân tích cấu trúc JWT
+JWT gồm 3 phần, ngăn cách bởi dấu .:
+HEADER.PAYLOAD.SIGNATURE
+
+1. Header (đã decode)
+
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+Ý nghĩa:
+alg: thuật toán ký – ở đây là HS256 (HMAC-SHA256).
+typ: loại token – là JWT.
+
+2. Payload (đã decode)
+
+{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}
+
+Giải thích các trường:
+sub (subject):	ID người dùng hoặc chủ thể của token. Ví dụ: userId.
+name:	Tên người dùng – chỉ là một thông tin thêm (tuỳ app).
+iat (issued at):	Thời điểm token được tạo (UNIX timestamp).
+
+Lưu ý: Payload KHÔNG được mã hóa – ai cũng đọc được nếu có token, nên KHÔNG nên để thông tin nhạy cảm ở đây như mật khẩu, số tài khoản, số CCCD,...
+
+3. Signature
+text
+Sao chép
+Chỉnh sửa
+SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+Dùng để xác minh tính toàn vẹn và xác thực token.
+
+Được tạo từ:
+
+HMACSHA256(
+  base64UrlEncode(header) + "." + base64UrlEncode(payload),
+  secret_key
+)
+
+3. Phân tích rủi ro bảo mật khi lộ thông tin trong Payload
+JWT không mã hóa payload, chỉ mã hóa chữ ký để bảo vệ tính toàn vẹn.
+
+Nếu bạn đặt số CMND, email, mật khẩu, hoặc dữ liệu nhạy cảm trong payload → bất kỳ ai có token cũng có thể xem được khi decode bằng công cụ như jwt.io.
+
+- Ví dụ rủi ro
+Giả sử payload như sau:
+
+{
+  "sub": "123",
+  "email": "admin@example.com",
+  "password": "123456",
+  "role": "ADMIN"
+}
+-> Rất nguy hiểm nếu attacker có token:
+Biết được email admin.
+Biết cả mật khẩu nếu không được mã hóa.
+Có thể lợi dụng "role": "ADMIN" để tấn công (nếu không xác thực chữ ký đúng cách).
+
